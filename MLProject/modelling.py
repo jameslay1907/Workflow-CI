@@ -12,7 +12,7 @@ if __name__ == "__main__":
     datasetPath = sys.argv[4] if len(sys.argv) > 4 else 'ai_student_impact_preprocessing'
 
     def returndataset(datasetname):
-        dataset = pd.read_csv(f'{datasetPath}/{datasetname}.csv')
+        dataset = pd.read_csv(f'MLProject/{datasetPath}/{datasetname}.csv')
         dataset = dataset.to_numpy()
         return dataset
 
@@ -26,15 +26,23 @@ if __name__ == "__main__":
     max_depth = int(sys.argv[2]) if len(sys.argv) > 2 else 6
     learning_rate = float(sys.argv[3]) if len(sys.argv) > 3 else 0.05
 
-    # with mlflow.start_run():
-    #     model = XGBClassifier(
-    #             objective='multi:softprob',
-    #             num_class=3,
-    #             n_estimators=n_estimators,
-    #             learning_rate=learning_rate,
-    #             max_depth=max_depth,
-    #             random_state=42
-    #     )
+    with mlflow.start_run():
+        model = XGBClassifier(
+                objective='multi:softprob',
+                num_class=3,
+                n_estimators=n_estimators,
+                learning_rate=learning_rate,
+                max_depth=max_depth,
+                random_state=42
+        )
 
-    #     model.fit(X_train, y_train)
+        model.fit(X_train, y_train)
+
+        predicted_data = model.predict(X_test)
+
+        mlflow.sklearn.log_model(sk_model=model, artifact_path="model", input_example=input_example)
+
+        # Log Metrics
+        accuracy = model.score(X_test, y_test)
+        mlflow.log_metric("accuracy", accuracy)
 
